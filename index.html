@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Poker Balance</title>
+  <link rel="stylesheet" href="styles/app.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="header">
+      <h1 class="title">Poker Balance</h1>
+      <div class="config">
+        <label for="stack-value" class="config-label">Stack value (chips)</label>
+        <input id="stack-value" type="number" min="1" step="1" value="5000" class="input-stack" autocomplete="off" />
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="table-wrap">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Start</th>
+              <th>Restacks</th>
+              <th>Final</th>
+              <th>Net P&L</th>
+              <th>Settlements</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="grid-body"></tbody>
+        </table>
+      </div>
+      <div class="grid-footer">
+        <button id="add-player" type="button" class="btn-add">+ Add player</button>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

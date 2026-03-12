@@ -1,0 +1,16 @@
+{
+  "name": "poker-balance",
+  "version": "1.0.0",
+  "description": "Poker game balance and optimal settlement calculator",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "vitest": "^2.0.0"
+  }
+}
