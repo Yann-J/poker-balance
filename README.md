@@ -2,6 +2,8 @@
 
 A single-page web app to compute poker game results and optimal settlements that minimize the number of transfers between players.
 
+![Poker Balance screenshot](docs/screenshot.png)
+
 ## Features
 
 - Player grid: name, start balance, restacks, final chip balance
