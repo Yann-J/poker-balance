@@ -195,6 +195,15 @@ export function removePlayer(id) {
   state.players = state.players.filter((p) => p.id !== id);
 }
 
+export function resetToDefault() {
+  state.stackValue = DEFAULT_STACK;
+  state.players = [
+    { id: nextId(), name: 'Alice', restacks: 0, finalBalance: 5500 },
+    { id: nextId(), name: 'Bob', restacks: 0, finalBalance: 4500 },
+    { id: nextId(), name: 'Charlie', restacks: 0, finalBalance: 5000 },
+  ];
+}
+
 export function updatePlayer(id, updates) {
   const idx = state.players.findIndex((p) => p.id === id);
   if (idx < 0) return;

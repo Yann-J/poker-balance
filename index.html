@@ -10,11 +10,14 @@
 <body>
   <div id="app" class="app">
     <header class="header">
-      <h1 class="title">Poker Balance</h1>
-      <div class="config">
-        <label for="stack-value" class="config-label">Stack value (chips)</label>
-        <input id="stack-value" type="number" min="1" step="1" value="5000" class="input-stack" autocomplete="off" />
+      <div class="header-left">
+        <h1 class="title">Poker Balance</h1>
+        <div class="config">
+          <label for="stack-value" class="config-label">Stack value (chips)</label>
+          <input id="stack-value" type="number" min="1" step="1" value="5000" class="input-stack" autocomplete="off" />
+        </div>
       </div>
+      <button id="reset" type="button" class="btn-reset">Reset</button>
     </header>
 
     <main class="main">

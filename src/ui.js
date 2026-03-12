@@ -108,6 +108,11 @@ export function bindEvents(refresh) {
     refresh();
   });
 
+  document.getElementById('reset')?.addEventListener('click', () => {
+    app.resetToDefault();
+    refresh();
+  });
+
   gridBody()?.addEventListener('focusin', (e) => {
     const input = e.target.closest('input');
     if (input) input.select();
