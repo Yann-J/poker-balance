@@ -8,8 +8,11 @@ export default [
       sourceType: 'module',
       globals: {
         document: 'readonly',
+        window: 'readonly',
         localStorage: 'readonly',
         crypto: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
       },
     },
   },

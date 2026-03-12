@@ -27,7 +27,7 @@ body {
 }
 
 .app {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }
@@ -56,19 +56,35 @@ body {
 }
 
 .input-stack {
-  width: 6rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+  width: 7rem;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.85rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius);
   color: var(--text);
-  font-size: 1rem;
-  transition: border-color 0.15s;
+  font-size: 1.05rem;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+.input-stack:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .input-stack:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.input-stack::-webkit-outer-spin-button,
+.input-stack::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .btn-add {
@@ -138,42 +154,142 @@ body {
   color: var(--loss);
 }
 
-.cell-name input,
-.cell-restacks input,
-.cell-final input {
+.cell-name,
+.cell-restacks,
+.cell-final {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   width: 100%;
-  min-width: 4rem;
-  padding: 0.5rem 0.65rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  min-width: 5rem;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.85rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-family: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 
-.cell-name input {
-  min-width: 7rem;
+.cell-name:hover,
+.cell-restacks:hover,
+.cell-final:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.cell-restacks input,
-.cell-final input {
-  min-width: 5rem;
+.cell-name {
+  min-width: 8rem;
+}
+
+.cell-restacks,
+.cell-final {
+  min-width: 6rem;
   text-align: right;
 }
 
-.cell-name input:focus,
-.cell-restacks input:focus,
-.cell-final input:focus {
+/* Custom +/- buttons for restacks */
+.td-restacks {
+  padding: 0.5rem 0.75rem;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.restacks-control {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: fit-content;
+  min-width: 4rem;
+}
+
+.restacks-control .cell-restacks {
+  flex: 0 0 1.75rem;
+  width: 1.75rem;
+  min-width: 0;
+  padding: 0.65rem 0.35rem;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  text-align: center;
+}
+
+.restacks-btns {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.restacks-btns .btn-spin {
+  flex: 1;
+  min-height: 1.15rem;
+  padding: 0 0.35rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.restacks-btns .btn-spin:first-child {
+  border-radius: 0 6px 0 0;
+  border-bottom: none;
+}
+
+.restacks-btns .btn-spin:last-child {
+  border-radius: 0 0 6px 0;
+}
+
+.restacks-btns .btn-spin:hover {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--text);
+}
+
+.restacks-control .cell-restacks::-webkit-outer-spin-button,
+.restacks-control .cell-restacks::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.restacks-control .cell-restacks {
+  -moz-appearance: textfield;
+}
+
+/* No spin buttons for final balance */
+.cell-final {
+  -moz-appearance: textfield;
+}
+
+.cell-final::-webkit-outer-spin-button,
+.cell-final::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cell-name:focus,
+.cell-restacks:focus,
+.cell-final:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.55);
 }
 
 .cell-start,
 .cell-pnl {
   font-variant-numeric: tabular-nums;
+}
+
+.cell-pnl {
+  min-width: 5rem;
+}
+
+.cell-adjusted {
+  min-width: 5rem;
 }
 
 .cell-pnl.pnl-win {

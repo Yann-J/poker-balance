@@ -19,19 +19,58 @@ let state = {
   players: defaultPlayers,
 };
 
-function loadState() {
+function encodeState() {
+  try {
+    const json = JSON.stringify(state);
+    return btoa(encodeURIComponent(json));
+  } catch {
+    return '';
+  }
+}
+
+function decodeState(encoded) {
+  try {
+    const json = decodeURIComponent(atob(encoded));
+    const parsed = JSON.parse(json);
+    if (parsed && typeof parsed.stackValue === 'number' && Array.isArray(parsed.players)) {
+      return parsed;
+    }
+  } catch {
+    // invalid
+  }
+  return null;
+}
+
+function loadFromUrl() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return false;
+  const parsed = decodeState(hash);
+  if (!parsed) return false;
+  state.stackValue = parsed.stackValue ?? DEFAULT_STACK;
+  state.players = parsed.players.length ? parsed.players : defaultPlayers;
+  return true;
+}
+
+function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       state.stackValue = parsed.stackValue ?? DEFAULT_STACK;
-      state.players = parsed.players?.length
-        ? parsed.players
-        : defaultPlayers;
+      state.players = parsed.players?.length ? parsed.players : defaultPlayers;
+      return true;
     }
   } catch {
-    // keep defaults
+    // ignore
   }
+  return false;
+}
+
+function loadState() {
+  if (loadFromUrl()) return;
+  if (loadFromStorage()) return;
+  state.stackValue = DEFAULT_STACK;
+  state.players = [...defaultPlayers];
 }
 
 function saveState() {
@@ -40,6 +79,9 @@ function saveState() {
   } catch {
     // ignore
   }
+  const encoded = encodeState();
+  const url = `${window.location.pathname}${window.location.search}#${encoded}`;
+  window.history.replaceState(null, '', url);
 }
 
 export function getState() {
@@ -81,13 +123,22 @@ function deriveViewState() {
     netPnl: computeNetPnl(p),
   }));
 
-  const netByPlayerId = {};
-  players.forEach((p) => {
-    netByPlayerId[p.id] = p.netPnl;
+  const totalNet = players.reduce((s, p) => s + p.netPnl, 0);
+  const n = players.length;
+  const errorPerPlayer = n > 0 && totalNet !== 0 ? totalNet / n : 0;
+
+  const playersWithAdjusted = players.map((p) => ({
+    ...p,
+    adjustedPnl: p.netPnl - errorPerPlayer,
+  }));
+
+  const adjustedByPlayerId = {};
+  playersWithAdjusted.forEach((p) => {
+    adjustedByPlayerId[p.id] = p.adjustedPnl;
   });
 
-  const transfers = computeSettlement(netByPlayerId);
-  const playerById = Object.fromEntries(players.map((p) => [p.id, p]));
+  const transfers = computeSettlement(adjustedByPlayerId);
+  const playerById = Object.fromEntries(playersWithAdjusted.map((p) => [p.id, p]));
 
   const settlements = transfers.map((t) => ({
     ...t,
@@ -95,7 +146,7 @@ function deriveViewState() {
     toName: playerById[t.toId]?.name ?? t.toId,
   }));
 
-  return { players, settlements };
+  return { players: playersWithAdjusted, settlements, totalError: totalNet };
 }
 
 function refresh() {
@@ -108,6 +159,10 @@ function init() {
   loadState();
   bindEvents(refresh);
   refresh();
+
+  window.addEventListener('hashchange', () => {
+    if (loadFromUrl()) refresh();
+  });
 }
 
 init();
