@@ -13,6 +13,8 @@ export default [
         crypto: 'readonly',
         btoa: 'readonly',
         atob: 'readonly',
+        TextEncoder: 'readonly',
+        TextDecoder: 'readonly',
       },
     },
   },
