@@ -19,6 +19,12 @@ let state = {
   players: defaultPlayers,
 };
 
+// Compact URL format: Rison-like with short keys (s=stack,p=players,n=name,r=restacks,f=finalBalance)
+function risonStr(s) {
+  if (/^[a-zA-Z0-9_-]*$/.test(s)) return s;
+  return "'" + String(s).replace(/'/g, "''") + "'";
+}
+
 function toBase64Url(input) {
   const bytes = new TextEncoder().encode(input);
   let binary = '';
@@ -37,16 +43,9 @@ function fromBase64Url(input) {
 
 function encodeState() {
   try {
-    const compact = {
-      s: state.stackValue,
-      p: state.players.map((x) => ({
-        i: x.id,
-        n: x.name,
-        r: x.restacks,
-        f: x.finalBalance,
-      })),
-    };
-    return toBase64Url(JSON.stringify(compact));
+    const p = state.players.map((x) => `(n:${risonStr(x.name)},r:${x.restacks},f:${x.finalBalance})`);
+    const compact = `(s:${state.stackValue},p:!(${p.join(',')}))`;
+    return toBase64Url(compact);
   } catch {
     return '';
   }
@@ -55,14 +54,14 @@ function encodeState() {
 function decodeState(encoded) {
   try {
     const str = fromBase64Url(encoded);
-    const parsed = JSON.parse(str);
+    const parsed = risonDecode(str);
     const stack = parsed?.s;
     const players = parsed?.p;
     if (parsed && typeof stack === 'number' && Array.isArray(players)) {
       return {
         stackValue: stack,
         players: players.map((x) => ({
-          id: x.i ?? crypto.randomUUID(),
+          id: crypto.randomUUID(),
           name: String(x.n ?? 'Player'),
           restacks: Number(x.r ?? 0),
           finalBalance: Number(x.f ?? stack),
@@ -73,6 +72,66 @@ function decodeState(encoded) {
     // invalid
   }
   return null;
+}
+
+function risonDecode(s) {
+  let i = 0;
+  const skip = () => { while (s[i] === ' ' || s[i] === '\n') i += 1; };
+  const parseVal = () => {
+    skip();
+    if (s[i] === '!') {
+      i += 1;
+      if (s[i] === '(') {
+        i += 1;
+        const arr = [];
+        while (i < s.length && s[i] !== ')') {
+          skip();
+          if (s[i] === '(') arr.push(parseVal());
+          skip();
+          if (s[i] === ',') i += 1;
+        }
+        if (s[i] === ')') i += 1;
+        return arr;
+      }
+      return s[i++] === 't';
+    }
+    if (s[i] === "'") {
+      i += 1;
+      let v = '';
+      while (i < s.length) {
+        if (s[i] === "'") {
+          i += 1;
+          if (s[i] === "'") { v += "'"; i += 1; }
+          else break;
+        } else v += s[i++];
+      }
+      return v;
+    }
+    if (s[i] === '(') {
+      i += 1;
+      const obj = {};
+      while (i < s.length && s[i] !== ')') {
+        skip();
+        let key = '';
+        while (s[i] && s[i] !== ':') key += s[i++];
+        if (s[i] === ':') i += 1;
+        obj[key] = parseVal();
+        skip();
+        if (s[i] === ',') i += 1;
+      }
+      if (s[i] === ')') i += 1;
+      return obj;
+    }
+    if (s[i] && /[a-zA-Z_]/.test(s[i])) {
+      let v = '';
+      while (s[i] && /[a-zA-Z0-9_-]/.test(s[i])) v += s[i++];
+      return v;
+    }
+    let v = '';
+    while (s[i] && /[-0-9.eE]/.test(s[i])) v += s[i++];
+    return Number(v);
+  };
+  return parseVal();
 }
 
 function loadFromUrl() {
