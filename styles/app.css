@@ -70,7 +70,7 @@ body {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
-  width: 7rem;
+  /* width: 7rem; */
   min-height: 2.5rem;
   padding: 0.65rem 0.85rem;
   background-color: rgba(0, 0, 0, 0.4);
@@ -145,13 +145,48 @@ body {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-elevated);
+  table-layout: fixed;
+  min-width: 74rem;
+}
+
+.col-name {
+  width: 7rem;
+}
+
+.col-start {
+  width: 4rem;
+}
+
+.col-restacks {
+  width: 4rem;
+}
+
+.col-final {
+  width: 5rem;
+}
+
+.col-net {
+  width: 5rem;
+}
+
+.col-adjusted {
+  width: 5rem;
+}
+
+.col-settlements {
+  width: 10rem;
+}
+
+.col-actions {
+  width: 3.25rem;
 }
 
 .grid th,
 .grid td {
-  padding: 0.75rem 1rem;
+  padding: 0.45rem 0.6rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
 .grid th {
@@ -189,8 +224,9 @@ body {
   appearance: none;
   width: 100%;
   min-width: 5rem;
-  min-height: 2.5rem;
-  padding: 0.65rem 0.85rem;
+  min-height: 2rem;
+  height: 100%;
+  padding: 0.45rem 0.6rem;
   background-color: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
@@ -206,20 +242,19 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.cell-name {
-  min-width: 8rem;
-}
-
 .cell-restacks,
 .cell-final {
-  min-width: 6rem;
   text-align: right;
 }
 
 /* Custom +/- buttons for restacks */
+.td-name,
+.td-final,
 .td-restacks {
-  padding: 0.5rem 0.75rem;
-  width: 1%;
+  /* padding: 0.25rem; */
+}
+
+.td-restacks {
   white-space: nowrap;
 }
 
@@ -227,15 +262,17 @@ body {
   display: flex;
   align-items: stretch;
   gap: 0;
-  width: fit-content;
-  min-width: 4rem;
+  height: 100%;
+  width: 100%;
+  min-height: 2.15rem;
+  min-width: 0;
 }
 
 .restacks-control .cell-restacks {
-  flex: 0 0 1.75rem;
-  width: 1.75rem;
+  flex: 1 1 auto;
+  width: auto;
   min-width: 0;
-  padding: 0.65rem 0.35rem;
+  padding: 0.45rem 0.35rem;
   border-right: none;
   border-radius: 6px 0 0 6px;
   text-align: center;
@@ -249,13 +286,13 @@ body {
 
 .restacks-btns .btn-spin {
   flex: 1;
-  min-height: 1.15rem;
-  padding: 0 0.35rem;
+  min-height: 1rem;
+  padding: 0 0.45rem;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: none;
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
@@ -283,11 +320,13 @@ body {
 }
 
 .restacks-control .cell-restacks {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
 /* No spin buttons for final balance */
 .cell-final {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -308,6 +347,11 @@ body {
 
 .cell-start,
 .cell-pnl {
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-restacks,
+.cell-final {
   font-variant-numeric: tabular-nums;
 }
 
@@ -332,7 +376,19 @@ body {
 .cell-settlements {
   font-size: 0.85rem;
   color: var(--text-muted);
-  max-width: 200px;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.cell-settlements span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid tbody tr[data-player-id] {
+  min-height: 3.15rem;
 }
 
 .btn-remove {

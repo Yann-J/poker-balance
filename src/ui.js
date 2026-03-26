@@ -10,10 +10,10 @@ function fmt(n) {
 function settlementsForPlayer(playerId, settlements) {
   const sends = settlements
     .filter((s) => s.fromId === playerId)
-    .map((s) => `Sends ${fmt(s.amount)} → ${s.toName}`);
+    .map((s) => `💸 ${fmt(s.amount)} → ${escapeHtml(s.toName)}`);
   const receives = settlements
     .filter((s) => s.toId === playerId)
-    .map((s) => `Receives ${fmt(s.amount)} from ${s.fromName}`);
+    .map((s) => `💰 ${fmt(s.amount)} ← ${escapeHtml(s.fromName)}`);
   return [...sends, ...receives];
 }
 
@@ -43,7 +43,7 @@ export function render(view, stackValue) {
       .map(
         (p) => `
     <tr data-player-id="${p.id}">
-      <td>
+      <td class="td-name">
         <input type="text" class="cell-name" value="${escapeHtml(p.name)}" data-field="name" />
       </td>
       <td class="cell-start">${fmt(p.startBalance)}</td>
@@ -56,12 +56,12 @@ export function render(view, stackValue) {
           </div>
         </div>
       </td>
-      <td>
+      <td class="td-final">
         <input type="number" class="cell-final" value="${p.finalBalance}" min="0" step="1" data-field="finalBalance" />
       </td>
       <td class="cell-pnl ${pnlClass(p.netPnl)}">${p.netPnl >= 0 ? '+' : ''}${fmt(p.netPnl)}</td>
       <td class="cell-pnl cell-adjusted ${pnlClass(p.adjustedPnl)}">${p.adjustedPnl >= 0 ? '+' : ''}${fmt(p.adjustedPnl)}</td>
-      <td class="cell-settlements">${settlementsForPlayer(p.id, settlements).join('<br>') || '—'}</td>
+      <td class="cell-settlements">${settlementsForPlayer(p.id, settlements).map((line) => `<span>${line}</span>`).join('') || '—'}</td>
       <td>
         <button type="button" class="btn-remove" data-action="remove" title="Remove" tabindex="-1">×</button>
       </td>
