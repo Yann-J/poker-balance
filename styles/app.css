@@ -146,7 +146,6 @@ body {
   border-collapse: collapse;
   background: var(--bg-elevated);
   table-layout: fixed;
-  min-width: 74rem;
 }
 
 .col-name {
@@ -158,7 +157,7 @@ body {
 }
 
 .col-restacks {
-  width: 4rem;
+  width: 5rem;
 }
 
 .col-final {
@@ -166,7 +165,7 @@ body {
 }
 
 .col-net {
-  width: 5rem;
+  width: 6rem;
 }
 
 .col-adjusted {
@@ -184,12 +183,12 @@ body {
 .grid th,
 .grid td {
   padding: 0.45rem 0.6rem;
-  text-align: left;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
 
 .grid th {
+  text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -243,7 +242,9 @@ body {
 }
 
 .cell-restacks,
-.cell-final {
+.cell-final,
+.cell-pnl,
+.cell-adjusted {
   text-align: right;
 }
 
@@ -251,7 +252,7 @@ body {
 .td-name,
 .td-final,
 .td-restacks {
-  /* padding: 0.25rem; */
+  padding: 0.25rem;
 }
 
 .td-restacks {
