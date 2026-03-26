@@ -4,14 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Poker Balance</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♠</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Poker Balance" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="styles/app.css" />
 </head>
 <body>
   <div id="app" class="app">
     <header class="header">
       <div class="header-left">
-        <h1 class="title">Poker Balance</h1>
+        <div class="title-row">
+          <h1 class="title">Poker Balance</h1>
+          <a
+            class="title-link"
+            href="https://github.com/Yann-J/poker-balance"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View source on GitHub"
+          >
+            <span class="title-link-icon" aria-hidden="true"></span>
+          </a>
+        </div>
         <div class="config">
           <label for="stack-value" class="config-label">Stack value (chips)</label>
           <input id="stack-value" type="number" min="1" step="1" value="5000" class="input-stack" autocomplete="off" />
