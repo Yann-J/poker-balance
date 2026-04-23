@@ -176,6 +176,10 @@ body {
   table-layout: fixed;
 }
 
+.col-drag {
+  width: 2.5rem;
+}
+
 .col-name {
   width: 7rem;
 }
@@ -281,6 +285,10 @@ body {
 .td-final,
 .td-restacks {
   padding: 0.25rem;
+}
+
+.td-drag {
+  text-align: center;
 }
 
 .td-restacks {
@@ -438,4 +446,36 @@ body {
   color: var(--loss);
   border-color: var(--loss);
   background: rgba(248, 81, 73, 0.1);
+}
+
+.btn-drag {
+  width: 1.7rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: grab;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.btn-drag:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.btn-drag:active {
+  cursor: grabbing;
+}
+
+.grid tbody tr.dragging {
+  opacity: 0.55;
+}
+
+.grid tbody tr.drop-target td {
+  border-top: 2px solid var(--accent);
 }

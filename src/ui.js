@@ -2,6 +2,7 @@ import * as app from './main.js';
 const stackInput = () => document.getElementById('stack-value');
 const addBtn = () => document.getElementById('add-player');
 const gridBody = () => document.getElementById('grid-body');
+let draggedPlayerId = null;
 
 function fmt(n) {
   return Number.isFinite(n) ? String(Math.round(n)) : '-';
@@ -43,6 +44,9 @@ export function render(view, stackValue) {
       .map(
         (p) => `
     <tr data-player-id="${p.id}">
+      <td class="td-drag">
+        <button type="button" class="btn-drag" data-action="drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag ${escapeHtml(p.name)} to reorder">⋮⋮</button>
+      </td>
       <td class="td-name">
         <input type="text" class="cell-name" value="${escapeHtml(p.name)}" data-field="name" />
       </td>
@@ -71,6 +75,7 @@ export function render(view, stackValue) {
       .join('') +
     `
     <tr class="${totalRowClass}">
+      <td></td>
       <td><strong>${players.length} player${players.length === 1 ? '' : 's'}</strong></td>
       <td class="cell-start">${fmt(totalStart)}</td>
       <td>${fmt(totalRestackValue)}</td>
@@ -91,6 +96,10 @@ function escapeHtml(s) {
 
 function selectAllOnFocus(e) {
   e.target.select();
+}
+
+function clearDropTargets() {
+  gridBody()?.querySelectorAll('tr.drop-target').forEach((row) => row.classList.remove('drop-target'));
 }
 
 export function bindEvents(refresh) {
@@ -171,5 +180,47 @@ export function bindEvents(refresh) {
       app.updatePlayer(id, { restacks: Math.max(0, next) });
       refresh();
     }
+  });
+
+  gridBody()?.addEventListener('dragstart', (e) => {
+    const handle = e.target.closest('[data-action="drag-handle"]');
+    if (!handle) return;
+    const row = handle.closest('tr[data-player-id]');
+    const id = row?.dataset?.playerId;
+    if (!id) return;
+    draggedPlayerId = id;
+    row?.classList.add('dragging');
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', id);
+    }
+  });
+
+  gridBody()?.addEventListener('dragover', (e) => {
+    if (!draggedPlayerId) return;
+    const row = e.target.closest('tr[data-player-id]');
+    if (!row || row.dataset.playerId === draggedPlayerId) return;
+    e.preventDefault();
+    clearDropTargets();
+    row.classList.add('drop-target');
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  });
+
+  gridBody()?.addEventListener('drop', (e) => {
+    if (!draggedPlayerId) return;
+    const row = e.target.closest('tr[data-player-id]');
+    const targetId = row?.dataset?.playerId;
+    if (!targetId || targetId === draggedPlayerId) return;
+    e.preventDefault();
+    app.reorderPlayers(draggedPlayerId, targetId);
+    draggedPlayerId = null;
+    clearDropTargets();
+    refresh();
+  });
+
+  gridBody()?.addEventListener('dragend', () => {
+    gridBody()?.querySelectorAll('tr.dragging').forEach((row) => row.classList.remove('dragging'));
+    draggedPlayerId = null;
+    clearDropTargets();
   });
 }

@@ -200,13 +200,24 @@ export function removePlayer(id) {
   state.players = state.players.filter((p) => p.id !== id);
 }
 
+export function reorderPlayers(sourceId, targetId) {
+  if (!sourceId || !targetId || sourceId === targetId) return;
+  const sourceIndex = state.players.findIndex((p) => p.id === sourceId);
+  const targetIndex = state.players.findIndex((p) => p.id === targetId);
+  if (sourceIndex < 0 || targetIndex < 0) return;
+
+  const nextPlayers = [...state.players];
+  const [sourcePlayer] = nextPlayers.splice(sourceIndex, 1);
+  nextPlayers.splice(targetIndex, 0, sourcePlayer);
+  state.players = nextPlayers;
+}
+
 export function resetToDefault() {
-  state.stackValue = DEFAULT_STACK;
-  state.players = [
-    { id: nextId(), name: 'Alice', restacks: 0, finalBalance: 5500 },
-    { id: nextId(), name: 'Bob', restacks: 0, finalBalance: 4500 },
-    { id: nextId(), name: 'Charlie', restacks: 0, finalBalance: 5000 },
-  ];
+  state.players = state.players.map((player) => ({
+    ...player,
+    restacks: 0,
+    finalBalance: state.stackValue,
+  }));
 }
 
 export function updatePlayer(id, updates) {
