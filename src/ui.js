@@ -104,10 +104,14 @@ function clearDropTargets() {
 }
 
 function readCellText(cell) {
+  const settlementLines = Array.from(cell.querySelectorAll('span'))
+    .map((span) => (span.textContent || '').trim())
+    .filter(Boolean);
+  if (settlementLines.length) return settlementLines;
   const input = cell.querySelector('input');
-  if (input) return (input.value || '').trim() || '—';
+  if (input) return [(input.value || '').trim() || '—'];
   const text = (cell.textContent || '').replace(/\s+/g, ' ').trim();
-  return text || '—';
+  return [text || '—'];
 }
 
 function buildTableSnapshot() {
@@ -120,7 +124,7 @@ function buildTableSnapshot() {
       if (!cells.length) return null;
       return {
         cells: cells.map((cell) => ({
-          text: readCellText(cell),
+          lines: readCellText(cell),
           className: cell.className,
         })),
         className: row.className,
@@ -142,7 +146,9 @@ async function tablePngBlob() {
   if (!snapshot) return null;
 
   const cellPaddingX = 10;
-  const rowHeight = 36;
+  const cellPaddingY = 8;
+  const minRowHeight = 36;
+  const lineHeight = 16;
   const borderColor = '#30363d';
   const textColor = '#e6edf3';
   const mutedTextColor = '#8b949e';
@@ -154,7 +160,11 @@ async function tablePngBlob() {
   const totalBgColor = 'rgba(0, 0, 0, 0.15)';
 
   const width = snapshot.colWidths.reduce((sum, colWidth) => sum + colWidth, 0);
-  const height = snapshot.rows.length * rowHeight;
+  const rowHeights = snapshot.rows.map((row) => {
+    const maxLines = row.cells.reduce((count, cell) => Math.max(count, cell.lines.length), 1);
+    return Math.max(minRowHeight, (cellPaddingY * 2) + (maxLines * lineHeight));
+  });
+  const height = rowHeights.reduce((sum, rowHeight) => sum + rowHeight, 0);
   const padding = 12;
   const ratio = Math.max(1, Math.floor(window.devicePixelRatio || 1));
 
@@ -177,6 +187,7 @@ async function tablePngBlob() {
   snapshot.rows.forEach((row, rowIndex) => {
     const rowIsHeader = rowIndex === 0;
     const rowIsTotal = row.className.includes('row-total');
+    const rowHeight = rowHeights[rowIndex];
     if (rowIsHeader) {
       ctx.fillStyle = headBgColor;
       ctx.fillRect(padding, y, width, rowHeight);
@@ -199,8 +210,12 @@ async function tablePngBlob() {
 
       ctx.textAlign = alignRight ? 'right' : 'left';
       const textX = alignRight ? x + colWidth - cellPaddingX : x + cellPaddingX;
-      const textY = y + (rowHeight / 2);
-      ctx.fillText(cell.text, textX, textY);
+      const contentHeight = cell.lines.length * lineHeight;
+      const textStartY = y + Math.max(cellPaddingY, (rowHeight - contentHeight) / 2) + (lineHeight / 2);
+      cell.lines.forEach((line, lineIndex) => {
+        const textY = textStartY + (lineIndex * lineHeight);
+        ctx.fillText(line, textX, textY);
+      });
 
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 1;
