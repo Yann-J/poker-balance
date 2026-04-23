@@ -1,6 +1,7 @@
 import * as app from './main.js';
 const stackInput = () => document.getElementById('stack-value');
 const addBtn = () => document.getElementById('add-player');
+const copyImageBtn = () => document.getElementById('copy-table-image');
 const gridBody = () => document.getElementById('grid-body');
 let draggedPlayerId = null;
 
@@ -102,6 +103,143 @@ function clearDropTargets() {
   gridBody()?.querySelectorAll('tr.drop-target').forEach((row) => row.classList.remove('drop-target'));
 }
 
+function readCellText(cell) {
+  const input = cell.querySelector('input');
+  if (input) return (input.value || '').trim() || '—';
+  const text = (cell.textContent || '').replace(/\s+/g, ' ').trim();
+  return text || '—';
+}
+
+function buildTableSnapshot() {
+  const table = document.querySelector('.grid');
+  if (!table) return null;
+
+  const sourceRows = Array.from(table.querySelectorAll('tr'))
+    .map((row) => {
+      const cells = Array.from(row.children).slice(1, -1);
+      if (!cells.length) return null;
+      return {
+        cells: cells.map((cell) => ({
+          text: readCellText(cell),
+          className: cell.className,
+        })),
+        className: row.className,
+      };
+    })
+    .filter(Boolean);
+
+  if (!sourceRows.length) return null;
+
+  const firstRowCells = Array.from(table.querySelector('tr')?.children || []).slice(1, -1);
+  if (!firstRowCells.length) return null;
+
+  const colWidths = firstRowCells.map((cell) => Math.max(60, Math.ceil(cell.getBoundingClientRect().width)));
+  return { rows: sourceRows, colWidths };
+}
+
+async function tablePngBlob() {
+  const snapshot = buildTableSnapshot();
+  if (!snapshot) return null;
+
+  const cellPaddingX = 10;
+  const rowHeight = 36;
+  const borderColor = '#30363d';
+  const textColor = '#e6edf3';
+  const mutedTextColor = '#8b949e';
+  const winColor = '#3fb950';
+  const lossColor = '#f85149';
+  const bgColor = '#0d1117';
+  const tableBgColor = '#161b22';
+  const headBgColor = 'rgba(0, 0, 0, 0.2)';
+  const totalBgColor = 'rgba(0, 0, 0, 0.15)';
+
+  const width = snapshot.colWidths.reduce((sum, colWidth) => sum + colWidth, 0);
+  const height = snapshot.rows.length * rowHeight;
+  const padding = 12;
+  const ratio = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = (width + (padding * 2)) * ratio;
+  canvas.height = (height + (padding * 2)) * ratio;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.scale(ratio, ratio);
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, width + (padding * 2), height + (padding * 2));
+  ctx.fillStyle = tableBgColor;
+  ctx.fillRect(padding, padding, width, height);
+
+  ctx.textBaseline = 'middle';
+  ctx.font = '500 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+  let y = padding;
+  snapshot.rows.forEach((row, rowIndex) => {
+    const rowIsHeader = rowIndex === 0;
+    const rowIsTotal = row.className.includes('row-total');
+    if (rowIsHeader) {
+      ctx.fillStyle = headBgColor;
+      ctx.fillRect(padding, y, width, rowHeight);
+    } else if (rowIsTotal) {
+      ctx.fillStyle = totalBgColor;
+      ctx.fillRect(padding, y, width, rowHeight);
+    }
+
+    let x = padding;
+    row.cells.forEach((cell, colIndex) => {
+      const colWidth = snapshot.colWidths[colIndex];
+      const alignRight = cell.className.includes('cell-pnl')
+        || cell.className.includes('cell-restacks')
+        || cell.className.includes('cell-final');
+
+      if (rowIsHeader) ctx.fillStyle = mutedTextColor;
+      else if (cell.className.includes('pnl-win')) ctx.fillStyle = winColor;
+      else if (cell.className.includes('pnl-loss')) ctx.fillStyle = lossColor;
+      else ctx.fillStyle = textColor;
+
+      ctx.textAlign = alignRight ? 'right' : 'left';
+      const textX = alignRight ? x + colWidth - cellPaddingX : x + cellPaddingX;
+      const textY = y + (rowHeight / 2);
+      ctx.fillText(cell.text, textX, textY);
+
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, colWidth, rowHeight);
+      x += colWidth;
+    });
+    y += rowHeight;
+  });
+
+  return new Promise((resolve) => {
+    canvas.toBlob(resolve, 'image/png');
+  });
+}
+
+async function copyTableImage() {
+  const blob = await tablePngBlob();
+  if (!blob) throw new Error('Could not generate table image.');
+
+  const clipboardAvailable = !!(
+    navigator.clipboard
+    && window.ClipboardItem
+    && typeof navigator.clipboard.write === 'function'
+  );
+
+  if (clipboardAvailable) {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    return 'copied';
+  }
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'poker-balance-table.png';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  return 'downloaded';
+}
+
 export function bindEvents(refresh) {
   const stackEl = stackInput();
   if (stackEl) {
@@ -120,6 +258,24 @@ export function bindEvents(refresh) {
   document.getElementById('reset')?.addEventListener('click', () => {
     app.resetToDefault();
     refresh();
+  });
+
+  copyImageBtn()?.addEventListener('click', async (e) => {
+    const button = e.currentTarget;
+    if (!(button instanceof HTMLButtonElement)) return;
+    const initialLabel = button.textContent;
+    button.disabled = true;
+    try {
+      const result = await copyTableImage();
+      button.textContent = result === 'copied' ? 'Copied image' : 'Downloaded image';
+    } catch {
+      button.textContent = 'Copy failed';
+    } finally {
+      setTimeout(() => {
+        button.textContent = initialLabel;
+        button.disabled = false;
+      }, 1200);
+    }
   });
 
   gridBody()?.addEventListener('focusin', (e) => {
